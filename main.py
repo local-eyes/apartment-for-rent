@@ -24,7 +24,7 @@ def add_headers(response):
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization, data')
     return response
 
-@app.route('/')
+@app.route('/add-data')
 def index():
     available = magic()
     for flat in available:
@@ -46,22 +46,6 @@ def index():
         dateNow = datetime.now()
         updatedOn = dateNow.strftime("%Y-%m-%d %H:%M:%S")
         infoChips = ", ".join(flat['infoChips'][:6])
-        # print("\n", rent, infoChips)
-        # db_data.append({
-        # "title": title,
-        # "description": description,
-        # "imgUrl": imgUrl,
-        # "furnishing": furnishing,
-        # "area": area,
-        # "bhk": bhk,
-        # "imgCount": imgCount,
-        # "postedBy": postedBy,
-        # "rent": rent,
-        # "source": source,
-        # "date": date,
-        # "updatedOn": updatedOn,
-        # "infoChips": infoChips
-        # })
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO listings (title, description, imgUrl, furnishing, area, bhk, imgCount, postedBy, rent, source, date, updatedOn, infoChips) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);", (title, description, imgUrl, furnishing, area, bhk, imgCount, postedBy, rent, source, date, updatedOn, infoChips))
         mysql.connection.commit()
@@ -69,6 +53,7 @@ def index():
     # return jsonify(db_data)
     return "Done"
 
+@app.route('/magic')
 def magic():
     url = "https://www.magicbricks.com/property-for-rent/residential-real-estate?bedroom=1,2&proptype=Multistorey-Apartment,Builder-Floor-Apartment,Penthouse,Studio-Apartment,Service-Apartment&Locality=Pratap-Nagar&cityName=Jaipur"
     response = requests.get(url)
@@ -102,6 +87,8 @@ def magic():
             labels = child.findAll('div', attrs={'class':'mb-srp__card__summary--label'})
             values = child.findAll('div', attrs={'class':'mb-srp__card__summary--value'})
             infoChips.append(f"{labels[0].text} : {values[0].text}")
+        dateNow = datetime.now()
+        updatedOn = dateNow.strftime("%Y-%m-%d %H:%M:%S")
         flat.append({
             'title': title,
             'desc': desc,
@@ -110,9 +97,19 @@ def magic():
             'furnishing': furnishing,
             'postee':posteeInfo,
             'infoChips': infoChips,
-            'postedOn': postedOn
+            'postedOn': postedOn,
+            'updatedOn': updatedOn
         })
-    return flat
+    return jsonify(flat)
+
+@app.route('/update-entries')
+def update():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT updatedOn FROM listings")
+    db_data = cur.fetchone()
+    cur.close()
+    return jsonify(db_data)
+
 
 @app.route('/api/v1/available')
 def db():
