@@ -27,7 +27,7 @@ def add_headers(response):
 
 @app.route('/add-data/<provider>')
 def index(provider):
-    f = open(f'{provider}.json')
+    f = open(f'sites/{provider}.json')
     data = json.load(f)
     cur = mysql.connection.cursor()
     for listing in data:
@@ -60,6 +60,7 @@ def db():
         for _list in listings:
             infoChipsList = _list[12].split(', ')
             imgUrlsList = _list[2].split(',')
+            rent = int(_list[8].replace(',', ''))
             allApartments.append({
                 "id": _list[0],
                 "title": _list[1],
@@ -70,7 +71,7 @@ def db():
                 "bhk": _list[5],
                 "imgCount": _list[6],
                 "postedBy": _list[7],
-                "rent": _list[8],
+                "rent": rent,
                 "source": _list[9],
                 "date": _list[10],
                 "updatedOn": _list[11],
@@ -78,6 +79,57 @@ def db():
             })
     return jsonify(allApartments)
 
+@app.route('/api/filters')
+def filters():
+    if len(request.args) == 3:
+        bhk = request.args.get('bhk')
+        furnishings = request.args.get('furnishing').split(',')
+
+        if furnishings[0] != '':
+            furnishing = "'" + "', '".join(furnishings) + "'"
+        else:
+            furnishing = "'semifurnished','furnished','unfurnished'"
+        
+        if str(request.args.get('price')) != 'other':
+            priceTo = request.args.get('price').split('to')[1]
+        else:
+            priceTo = '100'
+        
+        if bhk != '':
+            queryBhk = f"(bhk IN ({bhk}))"
+        else:
+            queryBhk = f"(bhk IN (1, 2, 3))"
+        queryFurnishing = f"(furnishing IN ({furnishing}))"
+        queryPrice = f"(rent <= {priceTo}000)"
+        finalQuery = f"SELECT * FROM listings WHERE {queryBhk} AND {queryFurnishing} AND {queryPrice};"
+        print('\n' + finalQuery + '\n')
+        flats = []
+        cur = mysql.connection.cursor()
+        q = cur.execute(finalQuery)
+        if q > 0:
+            listings = cur.fetchall()
+            for _list in listings:
+                infoChipsList = _list[12].split(', ')
+                imgUrlsList = _list[2].split(',')
+                flats.append({
+                    "id": _list[0],
+                    "title": _list[1],
+                    "description": _list[13],
+                    "imgUrl": imgUrlsList,
+                    "furnishing": _list[3],
+                    "area": _list[4],
+                    "bhk": _list[5],
+                    "imgCount": _list[6],
+                    "postedBy": _list[7],
+                    "rent": _list[8],
+                    "source": _list[9],
+                    "date": _list[10],
+                    "updatedOn": _list[11],
+                    "infoChips": infoChipsList
+                })
+        return jsonify(flats)
+    else:
+        return "Invalid request"
 
 if __name__ == '__main__':
     app.run(debug=True)
