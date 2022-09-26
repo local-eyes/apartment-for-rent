@@ -44,8 +44,10 @@ def index(provider):
         updatedOn = listing['updatedOn']
         bhk = listing['bhk']
         source = listing['source']
+        contactType = listing['contactType']
+        contact = listing['contact']
 
-        cur.execute("INSERT INTO listings (title, description, rent, imgCount, urlList, furnishing, postedBy, infoChips, date, area, updatedOn, bhk, source) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (title, description, rent, imgCount, imgs, furnishing, postedBy, infoChips, date, area, updatedOn, bhk, source))
+        cur.execute("INSERT INTO listings (title, description, rent, contactType, contact, imgCount, urlList, furnishing, postedBy, infoChips, date, area, updatedOn, bhk, source) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (title, description, rent, contactType, contact, imgCount, imgs, furnishing, postedBy, infoChips, date, area, updatedOn, bhk, source))
         cur.connection.commit()
     cur.close()
     return "Added to database"
@@ -81,17 +83,19 @@ def db():
 
 @app.route('/api/filters')
 def filters():
-    if len(request.args) == 3:
+    if len(request.args) == 4:
         bhk = request.args.get('bhk')
         furnishings = request.args.get('furnishing').split(',')
+        area = request.args.get('area')
 
         if furnishings[0] != '':
             furnishing = "'" + "', '".join(furnishings) + "'"
         else:
             furnishing = "'semifurnished','furnished','unfurnished'"
         
-        if str(request.args.get('price')) != 'other':
-            priceTo = request.args.get('price').split('to')[1]
+        priceQuery = request.args.get('price').split("to")
+        if len(priceQuery) == 2:
+            priceTo = priceQuery[1]
         else:
             priceTo = '100'
         
@@ -101,7 +105,7 @@ def filters():
             queryBhk = f"(bhk IN (1, 2, 3))"
         queryFurnishing = f"(furnishing IN ({furnishing}))"
         queryPrice = f"(rent <= {priceTo}000)"
-        finalQuery = f"SELECT * FROM listings WHERE {queryBhk} AND {queryFurnishing} AND {queryPrice};"
+        finalQuery = f"SELECT * FROM listings WHERE {queryBhk} AND {queryFurnishing} AND {queryPrice} AND area='{area}';"
         print('\n' + finalQuery + '\n')
         flats = []
         cur = mysql.connection.cursor()
