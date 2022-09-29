@@ -20,9 +20,10 @@ driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 time.sleep(2)
 driver.execute_script("window.scrollTo(0, 0);")
 time.sleep(2)
-spl = int(input("Enter Special Element index"))
-feat = int(input("Enter Featured Element index"))
-for i in range(5, len(listings)):
+spl = int(input("Enter Special Element index\n"))
+feat = int(input("Enter Featured Element index\n"))
+rera = int(input("Enter Rera last listing\n"))
+for i in range(rera, len(listings)):
     driver.execute_script("arguments[0].scrollIntoView();", listings[i])
     print("\n" + listings[i].text + "\n")
     time.sleep(2)
@@ -54,15 +55,23 @@ for i in range(5, len(listings)):
     postedBy = f"{owner_agent.capitalize()}: {name}"
     contactElem = listings[i].find_element_by_tag_name("button").click()
     isLoggedIn = input("Logged In?")
-    contact = driver.find_element_by_css_selector('div.component__activeDetails').text
-    time.sleep(2)
-    driver.find_element_by_css_selector("i[data-label='CLOSE'").click()
-    print("CONTACT DETAILS: " + contact + "\n\n")
+    if (isLoggedIn == 'y'):
+        contactType = "number"
+        contact = driver.find_element_by_css_selector('div.component__activeDetails').text
+        time.sleep(2)
+        driver.find_element_by_css_selector("i[data-label='CLOSE']").click()
+        print("CONTACT DETAILS: " + contact + "\n\n")
+    else:
+        driver.find_element_by_css_selector("i.iconS_Common_24.icon_close.style__close").click()
     time.sleep(2)
     listings[i].click()
     time.sleep(5)
     driver.switch_to.window(driver.window_handles[1])
     furnishing = driver.find_element_by_id('furnishingLabel').text
+    if isLoggedIn == 'n':
+        contactType = "url"
+        contact = driver.current_url
+        print("CONTACT DETAILS: " + contact + "\n\n")
     # furnishing = furnishingElem.find_element_by_tag_name('h2').text.lower()
     bhk= driver.find_element_by_id('bedWash').find_element_by_tag_name('b').text
     infoChips = []
@@ -92,7 +101,7 @@ for i in range(5, len(listings)):
         'title': title,
         'description': description,
         'rent': rent,
-        'contactType': 'number',
+        'contactType': contactType,
         'contact': contact,
         'imgCount': imgCount,
         'imgs': ",".join(imgs),
