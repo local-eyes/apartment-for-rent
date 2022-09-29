@@ -14,7 +14,7 @@ options.add_experimental_option('excludeSwitches', ['enable-logging'])
 options.add_argument('--ignore-certificate-errors')
 options.add_argument('--incognito')
 driver = webdriver.Chrome("chromedriver", chrome_options=options)
-driver.get("https://www.magicbricks.com/property-for-rent/residential-real-estate?bedroom=1,2&proptype=Multistorey-Apartment,Builder-Floor-Apartment,Penthouse,Studio-Apartment,Service-Apartment&Locality=Pratap-Nagar&cityName=Jaipur")
+driver.get("https://www.magicbricks.com/property-for-rent/residential-real-estate?bedroom=3,1,2&proptype=Multistorey-Apartment,Builder-Floor-Apartment,Penthouse,Studio-Apartment,Service-Apartment&Locality=Pratap-Nagar&cityName=Jaipur")
 driver.maximize_window()
 time.sleep(5)
 cons = driver.find_elements_by_class_name("mb-srp__list")
@@ -95,7 +95,7 @@ for elem in cons:
  
     # write to json file in append mode
     print("Writing to file...")
-    with open("data.json", "a") as outfile:
+    with open("magic_bricks.json", "a") as outfile:
         outfile.write(json_object)
         outfile.write(",")
     print("Done\n\n\n")
