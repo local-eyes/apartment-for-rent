@@ -31,6 +31,7 @@ def index(provider):
     data = json.load(f)
     cur = mysql.connection.cursor()
     for listing in data:
+        infochips = listing['infoChips'].split(',')
         title = listing['title']
         description = listing['description']
         rent = listing['rent']
@@ -38,7 +39,7 @@ def index(provider):
         imgs = listing['imgs']
         furnishing = listing['furnishing']
         postedBy = listing['postedBy']
-        infoChips = listing['infoChips']
+        infoChips = ", ".join(infochips)
         date = listing['date']
         area = listing['area']
         updatedOn = listing['updatedOn']
@@ -60,23 +61,24 @@ def db():
         allApartments = []
         listings = cur.fetchall()
         for _list in listings:
-            infoChipsList = _list[12].split(', ')
+            infoChipsList = _list[14].split(', ')
             imgUrlsList = _list[2].split(',')
-            rent = int(_list[8].replace(',', ''))
             allApartments.append({
                 "id": _list[0],
                 "title": _list[1],
-                "description": _list[13],
+                "description": _list[15],
                 "imgUrl": imgUrlsList,
                 "furnishing": _list[3],
                 "area": _list[4],
                 "bhk": _list[5],
                 "imgCount": _list[6],
                 "postedBy": _list[7],
-                "rent": rent,
-                "source": _list[9],
-                "date": _list[10],
-                "updatedOn": _list[11],
+                "rent": _list[8],
+                "contactType": _list[9],
+                "contact": _list[10],
+                "source": _list[11],
+                "date": _list[12],
+                "updatedOn": _list[13],
                 "infoChips": infoChipsList
             })
     return jsonify(allApartments)
@@ -113,12 +115,12 @@ def filters():
         if q > 0:
             listings = cur.fetchall()
             for _list in listings:
-                infoChipsList = _list[12].split(', ')
+                infoChipsList = _list[14].split(',')
                 imgUrlsList = _list[2].split(',')
                 flats.append({
                     "id": _list[0],
                     "title": _list[1],
-                    "description": _list[13],
+                    "description": _list[15],
                     "imgUrl": imgUrlsList,
                     "furnishing": _list[3],
                     "area": _list[4],
@@ -126,9 +128,11 @@ def filters():
                     "imgCount": _list[6],
                     "postedBy": _list[7],
                     "rent": _list[8],
-                    "source": _list[9],
-                    "date": _list[10],
-                    "updatedOn": _list[11],
+                    "contactType": _list[9],
+                    "contact": _list[10],
+                    "source": _list[11],
+                    "date": _list[12],
+                    "updatedOn": _list[13],
                     "infoChips": infoChipsList
                 })
         return jsonify(flats)
