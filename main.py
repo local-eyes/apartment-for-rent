@@ -1,10 +1,7 @@
-from flask import Flask, request, session, jsonify
+from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 from os import urandom
 from yaml import load, FullLoader
-import requests
-from bs4 import BeautifulSoup as bs
-from datetime import datetime
 import json
 
 app = Flask(__name__)
